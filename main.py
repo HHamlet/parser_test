@@ -26,21 +26,18 @@ def parse_site(link):
     class_for_rank = ("tw-text-gray-900 dark:tw-text-moon-50 tw-px-1 "
                       "tw-py-2.5 2lg:tw-p-2.5 tw-bg-inherit tw-sticky tw-left-[24px]")
 
-    class_for_name = "tw-text-gray-700 dark:tw-text-moon-100 tw-font-semibold tw-text-sm tw-leading-5"
-
     class_for_coin = "tw-text-gray-900 dark:tw-text-moon-50 tw-px-1 tw-py-2.5 2lg:tw-p-2.5 tw-bg-inherit tw-text-end"
 
     coins = soup.find('tbody').find_all('tr')
     for coin in coins:
         rank = coin.find(class_=class_for_rank).text.strip()
-        coin_name_tk = coin.find(class_=class_for_name).text.strip().split()
+        coin_name_tk = coin.find(class_='tw-text-gray-700').text.strip().split()
 
         coin_link = url + coin.find(class_="tw-flex tw-items-center tw-w-full").get("href")
 
         coin_img = coin.find(class_="tw-mr-2 !tw-h-6 tw-w-6 tw-object-fill").get("src")
 
-        coin_price = coin.find(
-            class_=class_for_coin).text.strip()
+        coin_price = coin.find('span', {'data-price-target': "price"}).text
         temp = "".join(re.findall(r"\d+\.\d+", coin_price.replace(",", "")))
         decimal_price = Decimal(temp)
 
