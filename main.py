@@ -29,29 +29,25 @@ def parse_site(link):
         return not tag.has_attr('tw-hidden')
 
     for coin in coins:
-
         if hidden_attr_filter(coin):
-
-            rank = coin.find(class_='tw-text-gray-900 dark:tw-text-moon-50 tw-px-1 '
-                                    'tw-py-2.5 2lg:tw-p-2.5 tw-bg-inherit tw-sticky tw-left-[24px]').text.strip()
-            coin_link = url + coin.find(class_="tw-flex tw-items-center tw-w-full").get("href")
-
-            coin_img = coin.find(class_="tw-mr-2 !tw-h-6 tw-w-6 tw-object-fill").get("src")
-            coin_name_tk = coin.find(class_='tw-text-gray-700').text.strip().split()
-
-            coin_price = coin.find('span', {'data-price-target': "price"}).text
+            teg_td = coin.find_all('td')
+            coin_rank = teg_td[1].text.strip()
+            coin_name_tk = teg_td[2].div.text.split()
+            coin_link = url + teg_td[2].a.get('href')
+            coin_img = teg_td[2].img.get('src')
+            coin_price = teg_td[4].text
             temp = "".join(re.findall(r"\d+\.\d+", coin_price.replace(",", "")))
             decimal_price = Decimal(temp)
 
-            coin_volume24h = coin.findChildren('span', {'data-price-target': "price"})[-3].text
+            coin_volume24h = teg_td[9].text
             temp = "".join(re.findall(r"\d+", coin_volume24h.replace(",", "")))
             decimal_volume24h = Decimal(temp)
 
-            coin_market_cap = coin.findChildren('span', {'data-price-target': "price"})[-2].text.strip()
+            coin_market_cap = teg_td[10].text
             temp = "".join(re.findall(r"\d+", coin_market_cap.replace(",", "")))
             decimal_market_cap = Decimal(temp)
 
-            coin_data = [rank, coin_name_tk[0], coin_name_tk[1], coin_link, coin_img, decimal_price, decimal_volume24h, decimal_market_cap]
+            coin_data = [coin_rank, coin_name_tk[0], coin_name_tk[1], coin_link, coin_img, decimal_price, decimal_volume24h, decimal_market_cap]
             coin_list.append(coin_data)
 
     return coin_list
