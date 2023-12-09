@@ -23,36 +23,36 @@ def parse_site(link):
     coin_list = []
     res = requests.get(link, headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
-    class_for_rank = ("tw-text-gray-900 dark:tw-text-moon-50 tw-px-1 "
-                      "tw-py-2.5 2lg:tw-p-2.5 tw-bg-inherit tw-sticky tw-left-[24px]")
-
-    class_for_coin = "tw-text-gray-900 dark:tw-text-moon-50 tw-px-1 tw-py-2.5 2lg:tw-p-2.5 tw-bg-inherit tw-text-end"
-
     coins = soup.find('tbody').find_all('tr')
+
+    def hidden_attr_filter(tag):
+        return not tag.has_attr('tw-hidden')
+
     for coin in coins:
-        rank = coin.find(class_=class_for_rank).text.strip()
-        coin_name_tk = coin.find(class_='tw-text-gray-700').text.strip().split()
 
-        coin_link = url + coin.find(class_="tw-flex tw-items-center tw-w-full").get("href")
+        if hidden_attr_filter(coin):
 
-        coin_img = coin.find(class_="tw-mr-2 !tw-h-6 tw-w-6 tw-object-fill").get("src")
+            rank = coin.find(class_='tw-text-gray-900 dark:tw-text-moon-50 tw-px-1 '
+                                    'tw-py-2.5 2lg:tw-p-2.5 tw-bg-inherit tw-sticky tw-left-[24px]').text.strip()
+            coin_link = url + coin.find(class_="tw-flex tw-items-center tw-w-full").get("href")
 
-        coin_price = coin.find('span', {'data-price-target': "price"}).text
-        temp = "".join(re.findall(r"\d+\.\d+", coin_price.replace(",", "")))
-        decimal_price = Decimal(temp)
+            coin_img = coin.find(class_="tw-mr-2 !tw-h-6 tw-w-6 tw-object-fill").get("src")
+            coin_name_tk = coin.find(class_='tw-text-gray-700').text.strip().split()
 
-        coin_volume24h = coin.findChildren(
-            class_=class_for_coin)[-2].text.strip()
-        temp = "".join(re.findall(r"\d+", coin_volume24h.replace(",", "")))
-        decimal_value24h = Decimal(temp)
+            coin_price = coin.find('span', {'data-price-target': "price"}).text
+            temp = "".join(re.findall(r"\d+\.\d+", coin_price.replace(",", "")))
+            decimal_price = Decimal(temp)
 
-        coin_market_cap = coin.findChildren(
-            class_=class_for_coin)[-1].text.strip()
-        temp = "".join(re.findall(r"\d+", coin_market_cap.replace(",", "")))
-        decimal_market_cap = Decimal(temp)
+            coin_volume24h = coin.findChildren('span', {'data-price-target': "price"})[-3].text
+            temp = "".join(re.findall(r"\d+", coin_volume24h.replace(",", "")))
+            decimal_volume24h = Decimal(temp)
 
-        coin_data = [rank, coin_name_tk[0], coin_name_tk[1], coin_link, coin_img, decimal_price, decimal_value24h, decimal_market_cap]
-        coin_list.append(coin_data)
+            coin_market_cap = coin.findChildren('span', {'data-price-target': "price"})[-2].text.strip()
+            temp = "".join(re.findall(r"\d+", coin_market_cap.replace(",", "")))
+            decimal_market_cap = Decimal(temp)
+
+            coin_data = [rank, coin_name_tk[0], coin_name_tk[1], coin_link, coin_img, decimal_price, decimal_volume24h, decimal_market_cap]
+            coin_list.append(coin_data)
 
     return coin_list
 
