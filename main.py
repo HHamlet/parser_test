@@ -25,30 +25,24 @@ def parse_site(link):
     soup = BeautifulSoup(res.content, "html.parser")
     coins = soup.find('tbody').find_all('tr')
 
-    def hidden_attr_filter(tag):
-        return not tag.has_attr('tw-hidden')
+    def normalizer_with_dot(text):
+        return "".join(re.findall(r"\d+\.\d+", text.replace(",", "")))
+
+    def normalizer_without_dot(text):
+        return "".join(re.findall(r"\d+", text.replace(",", "")))
 
     for coin in coins:
-        if hidden_attr_filter(coin):
-            teg_td = coin.find_all('td')
-            coin_rank = teg_td[1].text.strip()
-            coin_name_tk = teg_td[2].div.text.split()
-            coin_link = url + teg_td[2].a.get('href')
-            coin_img = teg_td[2].img.get('src')
-            coin_price = teg_td[4].text
-            temp = "".join(re.findall(r"\d+\.\d+", coin_price.replace(",", "")))
-            decimal_price = Decimal(temp)
+        teg_td = coin.find_all('td', class_=lambda x: x and 'tw-hidden' not in x.split())
+        coin_rank = teg_td[1].text.strip()
+        coin_name_tk = teg_td[2].div.text.split()
+        coin_link = url + teg_td[2].a.get('href')
+        coin_img = teg_td[2].img.get('src')
+        decimal_price = Decimal(normalizer_with_dot(teg_td[4].text))
+        decimal_volume24h = Decimal(normalizer_without_dot(teg_td[9].text))
+        decimal_market_cap = Decimal(normalizer_without_dot(teg_td[10].text))
 
-            coin_volume24h = teg_td[9].text
-            temp = "".join(re.findall(r"\d+", coin_volume24h.replace(",", "")))
-            decimal_volume24h = Decimal(temp)
-
-            coin_market_cap = teg_td[10].text
-            temp = "".join(re.findall(r"\d+", coin_market_cap.replace(",", "")))
-            decimal_market_cap = Decimal(temp)
-
-            coin_data = [coin_rank, coin_name_tk[0], coin_name_tk[1], coin_link, coin_img, decimal_price, decimal_volume24h, decimal_market_cap]
-            coin_list.append(coin_data)
+        coin_data = [coin_rank, coin_name_tk[0], coin_name_tk[1], coin_link, coin_img, decimal_price, decimal_volume24h, decimal_market_cap]
+        coin_list.append(coin_data)
 
     return coin_list
 
