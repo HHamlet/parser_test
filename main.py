@@ -18,8 +18,8 @@ def write_csv(f_name, coin_list):
             writer.writerow(coin)
 
 
-def normalizer(text):
-    return "".join(re.findall(r"\d+\S+|\d+", text.replace(",", "")))
+def refine_price(text):
+    return text.strip(' \n$').replace(",", "")
 
 
 def parse_site(link):
@@ -35,9 +35,9 @@ def parse_site(link):
         coin_name_tk = teg_td[2].div.text.split()
         coin_link = url + teg_td[2].a.get('href')
         coin_img = teg_td[2].img.get('src')
-        decimal_price = Decimal(normalizer(teg_td[4].text))
-        decimal_volume24h = Decimal(normalizer(teg_td[9].text))
-        decimal_market_cap = Decimal(normalizer(teg_td[10].text))
+        decimal_price = Decimal(refine_price(teg_td[4].text))
+        decimal_volume24h = Decimal(refine_price(teg_td[9].text))
+        decimal_market_cap = Decimal(refine_price(teg_td[10].text))
 
         coin_data = [coin_rank, coin_name_tk[0], coin_name_tk[1], coin_link, coin_img, decimal_price, decimal_volume24h, decimal_market_cap]
         coin_list.append(coin_data)
