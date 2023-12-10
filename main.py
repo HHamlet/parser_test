@@ -18,6 +18,10 @@ def write_csv(f_name, coin_list):
             writer.writerow(coin)
 
 
+def normalizer(text):
+    return "".join(re.findall(r"\d+\S+", text.replace(",", "")))
+
+
 def parse_site(link):
     url = 'https://www.coingecko.com'
     coin_list = []
@@ -25,21 +29,15 @@ def parse_site(link):
     soup = BeautifulSoup(res.content, "html.parser")
     coins = soup.find('tbody').find_all('tr')
 
-    def normalizer_with_dot(text):
-        return "".join(re.findall(r"\d+\.\d+", text.replace(",", "")))
-
-    def normalizer_without_dot(text):
-        return "".join(re.findall(r"\d+", text.replace(",", "")))
-
     for coin in coins:
         teg_td = coin.find_all('td', class_=lambda x: x and 'tw-hidden' not in x.split())
         coin_rank = teg_td[1].text.strip()
         coin_name_tk = teg_td[2].div.text.split()
         coin_link = url + teg_td[2].a.get('href')
         coin_img = teg_td[2].img.get('src')
-        decimal_price = Decimal(normalizer_with_dot(teg_td[4].text))
-        decimal_volume24h = Decimal(normalizer_without_dot(teg_td[9].text))
-        decimal_market_cap = Decimal(normalizer_without_dot(teg_td[10].text))
+        decimal_price = Decimal(normalizer(teg_td[4].text))
+        decimal_volume24h = Decimal(normalizer(teg_td[9].text))
+        decimal_market_cap = Decimal(normalizer(teg_td[10].text))
 
         coin_data = [coin_rank, coin_name_tk[0], coin_name_tk[1], coin_link, coin_img, decimal_price, decimal_volume24h, decimal_market_cap]
         coin_list.append(coin_data)
