@@ -19,7 +19,7 @@ def write_csv(f_name, coin_list):
 
 
 def normalizer(text):
-    return "".join(re.findall(r"\d+\S+", text.replace(",", "")))
+    return "".join(re.findall(r"\d+\S+|\d+", text.replace(",", "")))
 
 
 def parse_site(link):
